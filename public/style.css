@@ -33,6 +33,8 @@ main {
 
 #inline-fields{
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 #inline-fields > *{

@@ -112,7 +112,7 @@
         </div>
       </div>
       <div class="number-desc mdc-card mdc-theme--primary-bg mdc-theme--on-primary">
-        Received damage: {{ calcDamageForAttack(damageCalcSelectedAmount, damageCalcSelectedType)}}
+        Received damage: {{ Math.round(calcDamageForAttack(damageCalcSelectedAmount, damageCalcSelectedType) * 100) / 100}}
       </div>
       </div>
 

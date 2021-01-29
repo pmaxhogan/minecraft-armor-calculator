@@ -212,7 +212,7 @@ const app = Vue.createApp({
   computed: {
     anyEnchantsOverLimit() {
       return Object.entries(this.enchantsProtectionPoints).some(
-        ([type, points]) => points >= 20
+        ([type, points]) => points > 20
       );
     },
     anyEnchantsMuchOverLimit() {

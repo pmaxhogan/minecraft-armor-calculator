@@ -51,6 +51,9 @@
       <div class="side-flex">
           <number-desc v-for="type in protOptionsTable" :number="enchantsProtectionPoints[type.id]" :number2="20" :class="{ 'over-limit': enchantsProtectionPoints[type.id] > 20 }"> {{ type.name }} EPF</number-desc>
       </div>
+      <div class="mdc-card mdc-theme--on-surface warning-card mdc-theme--on-error mdc-theme--error-bg" v-if="anyEnchantsMuchOverLimit"><i class="material-icons">error</i>The EPF for a category is far above the maximum, meaning an enchantment is wasted.</div>
+
+      <div class="mdc-card mdc-theme--on-surface warning-card mdc-theme--error" v-else-if="anyEnchantsOverLimit"><i class="material-icons">warning</i>One or more armor EPFs are above the maximum. The enchant points for each category are capped at 20, and any more than this has no effect.</div>
 
       <h3>Damage Stats</h3>
       <mdc-single-checkbox class="primary-form" id="raw-damage-checkbox" @checked-update="updateRawDamage">Display raw damage</mdc-single-checkbox>
@@ -70,11 +73,6 @@
           <number-desc :number="secondsToDieInLava">Seconds to die in lava</number-desc>
 
       </div>
-
-      <div class="mdc-card mdc-theme--on-surface warning-card mdc-theme--on-error mdc-theme--error-bg" v-if="anyEnchantsMuchOverLimit"><i class="material-icons">error</i>The EPF for a category is far above the maximum, meaning an enchantment is wasted.</div>
-
-      <div class="mdc-card mdc-theme--on-surface warning-card mdc-theme--error" v-else-if="anyEnchantsOverLimit"><i class="material-icons">warning</i>One or more armor EPFs are above the maximum. The enchant points for each category are capped at 20, and any more than this has no effect.</div>
-
 
       <h2>Damage Calculator</h2>
     <div id="inline-fields">

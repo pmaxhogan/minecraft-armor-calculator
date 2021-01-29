@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Minecraft Armor Calculator</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel='stylesheet' href='https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css'>
+    <link rel='stylesheet' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
+    <link rel="stylesheet" href="./style.css">
+  <meta name="Description" content="View stats for your Minecraft armor set!">
+
+
+</head>
+<body>
+<div id="app">
+  <header class="mdc-top-app-bar mdc-top-app-bar--fixed" ref="topBar">
+    <div class="mdc-top-app-bar__row">
+      <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+        <button class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button" aria-label="Go home" @click="scrollToTop">home</button>
+        <span class="mdc-top-app-bar__title">Minecraft Armor Calculator</span>
+      </section>
+      <!--       <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar">
+        <button class="material-icons mdc-top-app-bar__action-item mdc-icon-button" aria-label="Favorite">favorite</button>
+        <button class="material-icons mdc-top-app-bar__action-item mdc-icon-button" aria-label="Search">search</button>
+        <button class="material-icons mdc-top-app-bar__action-item mdc-icon-button" aria-label="Options">more_vert</button>
+      </section> -->
+    </div>
+  </header>
+
+  <main v-cloak class="mdc-theme--on-secondary mdc-theme--secondary-bg mdc-top-app-bar--fixed-adjust">
+    <h2>Difficulty Selection</h2>
+    <mdc-chip-set @chip-update="updateDifficulty" :options="difficultyOptions"></mdc-chip-set>
+
+    <h2>Armor Selection</h2>
+    <div class="armor-grid">
+        <armor-piece class="armor-card mdc-card mdc-theme--primary-bg mdc-theme--on-primary" v-for="(armor, type) in armor" @prot-type-change="updateProt" @feather-falling-enabled="updateFeatherFallingEnabled" @material-change="updateMaterial" :type="type" :initial-material="armor.material" :initial-prot="armor.prot"></armor-piece>
+    </div>
+
+      <h2>Stats</h2>
+      <h3>Armor Stats</h3>
+      <div class="side-flex">
+          <number-desc :number="armorPoints">Armor <a rel="noopener" href="https://minecraft.gamepedia.com/Armor#Defense_points" class="mdc-theme--on-primary" target="_blank" noopener noreferrer>points</a></number-desc>
+          <number-desc :number="toughness">Armor <a rel="noopener" href="https://minecraft.gamepedia.com/Armor#Armor_toughness" class="mdc-theme--on-primary" target="_blank" noopener noreferrer>toughness</a></number-desc>
+      </div>
+
+      <h3>Enchant Protection Factors (<a rel="noopener" href="https://minecraft.gamepedia.com/Armor#Enchantments" class="mdc-theme--on-secondary" target="_blank ">EPFs</a>)</h3>
+      <div class="side-flex">
+          <number-desc v-for="type in protOptionsTable" :number="enchantsProtectionPoints[type.id]" :number2="20" :class="{ 'over-limit': enchantsProtectionPoints[type.id] > 20 }"> {{ type.name }} EPF</number-desc>
+      </div>
+
+      <h3>Damage Stats</h3>
+      <mdc-single-checkbox class="primary-form" id="raw-damage-checkbox" @checked-update="updateRawDamage">Display raw damage</mdc-single-checkbox>
+      <div class="side-flex">
+
+          <number-desc health :show-health="!rawDamage" v-if="difficulty !== 'peaceful'" :number="damageDealtByZombie">Damage delt by zombie</number-desc>
+
+          <number-desc health :show-health="!rawDamage" v-if="difficulty !== 'peaceful'" :number="damageDealtByCreeper">Damage delt by creeper 1 block away</number-desc>
+
+          <number-desc health :show-health="!rawDamage" :number="damageDealtByPerfectSword">Damage delt by sharp5 netherite sword</number-desc>
+          <number-desc :number="Math.ceil(20 / damageDealtByPerfectSword)">Hits required to die to sharp5 netherite sword</number-desc>
+
+          <number-desc health :show-health="!rawDamage" :number="damageDealtByPerfectSwordCrit">Crit damage delt by sharp5 netherite sword</number-desc>
+          <number-desc :number="Math.ceil(20 / damageDealtByPerfectSwordCrit)">Crits required to die to sharp5 netherite sword</number-desc>
+
+          <number-desc :number="calcHeightThatGivesDamage(20)">block fall required to die</number-desc>
+          <number-desc :number="secondsToDieInLava">Seconds to die in lava</number-desc>
+
+      </div>
+
+      <div class="mdc-card mdc-theme--on-surface warning-card mdc-theme--on-error mdc-theme--error-bg" v-if="anyEnchantsMuchOverLimit"><i class="material-icons">error</i>The EPF for a category is far above the maximum, meaning an enchantment is wasted.</div>
+
+      <div class="mdc-card mdc-theme--on-surface warning-card mdc-theme--error" v-else-if="anyEnchantsOverLimit"><i class="material-icons">warning</i>One or more armor EPFs are above the maximum. The enchant points for each category are capped at 20, and any more than this has no effect.</div>
+
+
+      <h2>Damage Calculator</h2>
+    <div id="inline-fields">
+      <label class="mdc-text-field mdc-text-field--filled">
+      <span class="mdc-text-field__ripple"></span>
+      <span class="mdc-floating-label" id="damage-calc-label">Base damage amount</span>
+      <input v-model="damageCalcSelectedAmount" class="mdc-text-field__input" type="number" aria-labelledby="damage-calc-label" min="0" max="200">
+      <span class="mdc-line-ripple"></span>
+    </label>
+      <div class="mdc-select mdc-select--filled damage-selector-width">
+        <div class="mdc-select__anchor" role="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="damage-selector-label damage-selector-selected-text">
+          <span class="mdc-select__ripple"></span>
+          <span id="damage-selector-label" class="mdc-floating-label">Damage Type</span>
+          <span class="mdc-select__selected-text-container">
+            <span id="damage-selector-selected-text" class="mdc-select__selected-text">normal</span>
+          </span>
+          <span class="mdc-select__dropdown-icon">
+            <svg class="mdc-select__dropdown-icon-graphic" viewBox="7 10 10 5" focusable="false">
+              <polygon class="mdc-select__dropdown-icon-inactive" stroke="none" fill-rule="evenodd" points="7 10 12 15 17 10">
+              </polygon>
+              <polygon class="mdc-select__dropdown-icon-active" stroke="none" fill-rule="evenodd" points="7 15 12 10 17 15">
+              </polygon>
+            </svg>
+          </span>
+          <span class="mdc-line-ripple"></span>
+        </div>
+
+        <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+          <ul class="mdc-list" role="listbox" aria-label="Damage selector listbox">
+            <li v-for="elem in damageCalcOptions" class="mdc-list-item" :class="{'mdc-list-item--selected': elem.default}" :aria-selected="elem.default" :data-value="elem.id" role="option">
+              <span class="mdc-list-item__ripple"></span>
+              <span class="mdc-list-item__text">
+                {{elem.name}}
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="number-desc mdc-card mdc-theme--primary-bg mdc-theme--on-primary">
+        Received damage: {{ calcDamageForAttack(damageCalcSelectedAmount, damageCalcSelectedType)}}
+      </div>
+      </div>
+
+
+<!--       Armor points: {{ armorPoints }}
+      Toughness: {{ toughness }}
+      Enchants Protection Points: {{ enchantsProtectionPoints }}
+      Damage reduced by: {{ enchantsDamageReductionFactor }}
+
+      Damage points done by {{ damageCalcSelectedAmount }}-point attack:
+
+      <br />
+
+
+
+      <label>Fall from height of <input type="number" min="1" v-model="fallDamageCalcSelectedAmount"> blocks</label> does {{ Math.round(calcFallDamage(fallDamageCalcSelectedAmount) * 100) / 100}} points of damage -->
+
+      <small>Made by <a class="mdc-theme--on-secondary" href="https://programmer5000.com">programmer5000</a> on <a class="mdc-theme--on-secondary" href="https://github.com/realprogrammer5000/minecraft-armor-calculator">GitHub</a></small>
+  </main>
+</div>
+
+<template id="armor-piece">
+  <div>
+    <h3>{{ type }} Type</h3>
+    <div>
+      <mdc-chip-set @chip-update="updateMaterial" :options="materialOptions"></mdc-chip-set>
+    </div>
+    <template v-if="material !== 'none' && material !== 'elytra'">
+      <h4>{{ type }} Enchantments</h4>
+      <mdc-chip-set @chip-update="updateProt" :options="protOptions"></mdc-chip-set>
+      <div v-if="type === 'boots'">
+        <mdc-single-checkbox id="feather-falling-checkbox" @checked-update="updateFeatherFallingEnabled">Feather Falling 4</mdc-single-checkbox>
+      </div>
+    </template>
+  </div>
+</template>
+
+<template id="mdc-chip-set-template">
+  <div ref="root" class="mdc-chip-set mdc-chip-set--choice" role="grid">
+    <div class="mdc-chip" v-for="option in enumOptions" role="row" :data-id="option.id" :class="{ 'mdc-chip--selected': option.default }">
+      <div class="mdc-chip__ripple"></div>
+      <span role="gridcell">
+        <span role="button" tabindex="0" class="mdc-chip__primary-action">
+          <span class="mdc-chip__text">{{ option.name }}</span>
+        </span>
+      </span>
+    </div>
+  </div>
+</template>
+
+<template id="mdc-single-checkbox-template">
+  <div class="mdc-form-field" ref="formField">
+    <div class="mdc-switch" ref="switchElem">
+      <div class="mdc-switch__track"></div>
+      <div class="mdc-switch__thumb-underlay">
+        <div class="mdc-switch__thumb"></div>
+        <input type="checkbox" :id="id" class="mdc-switch__native-control" role="switch" aria-checked="false">
+      </div>
+    </div>
+    <label :for="id">
+      <slot></slot>
+    </label>
+  </div>
+</template>
+
+<template id="number-desc-template">
+  <div class="number-desc mdc-card mdc-theme--primary-bg mdc-theme--on-primary mdc-layout-grid__cell--span-2">
+    <span :class="{'health-color': number >= 20 && health}" class="number-desc-number mdc-typography--headline5">{{displayNumber}}<template v-if="percent">%</template><template v-if="number2"> / {{Math.round(number2 * 100) / 100}}</template><i v-if="showHealth" class="material-icons">clear</i><i v-if="showHealth" class="material-icons health-color">favorite</i></span>
+    <span class="number-desc-desc mdc-typography--overline">
+      <slot></slot>
+    </span>
+  </div>
+</template>
+  <script src='https://cdn.jsdelivr.net/npm/vue@3.0.5/dist/vue.global.prod.js'></script>
+<script src='https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js'></script><script  src="./script.js"></script>
+</body>
+</html>

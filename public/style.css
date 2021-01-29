@@ -1,0 +1,188 @@
+:root {
+  --mdc-theme-primary: #6a1b9a;
+  --mdc-theme-secondary: #4a148c;
+}
+
+body {
+  margin: 0;
+  background-color: var(--mdc-theme-secondary);
+}
+body::-webkit-scrollbar {
+  width: 1em;
+}
+ 
+body::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+ 
+body::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3);
+/*   outline: 1px solid rgba(0, 0, 0, 0.3); */
+  border-radius: 5px;
+}
+
+main {
+  padding-left: 8px;
+  padding-right: 8px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#inline-fields{
+  display: flex;
+}
+
+#inline-fields > *{
+  margin: 24px;
+}
+
+.mdc-text-field__input {
+    min-width: 200px;
+}
+
+.primary-form .mdc-switch.mdc-switch--checked .mdc-switch__track {
+  background-color: #018786;
+  background-color: var(--mdc-theme-primary, #018786);
+}
+
+.primary-form .mdc-switch__thumb-underlay::before,
+.primary-form .mdc-switch__thumb-underlay::after {
+  background-color: #018786;
+  background-color: var(--mdc-ripple-color, var(--mdc-theme-primary, #018786));
+}
+
+.primary-form .mdc-switch.mdc-switch--checked .mdc-switch__thumb {
+  background-color: #018786;
+  background-color: var(--mdc-theme-primary, #018786);
+  border-color: #018786;
+  border-color: var(--mdc-theme-primary, #018786);
+}
+
+.primary-form .mdc-switch.mdc-switch--checked .mdc-switch__thumb {
+  background-color: #018786;
+  background-color: var(--mdc-theme-primary, #018786);
+  border-color: #018786;
+  border-color: var(--mdc-theme-primary, #018786);
+}
+
+.armor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  max-width: 1400px;
+}
+
+@media only screen and (max-width: 600px) {
+  .armor-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+[v-cloak] {
+  display: none;
+}
+
+label {
+  margin-right: 1em;
+}
+
+.mdc-chip-set {
+  justify-content: center;
+}
+
+.mdc-chip__text,
+h3,
+h4 {
+  text-transform: capitalize;
+}
+.mdc-chip-set,
+.mdc-form-field {
+  user-select: none;
+}
+
+.mdc-form-field {
+  margin: 8px;
+  color: inherit;
+}
+
+.number-desc {
+  padding: 16px;
+  justify-content: center;
+}
+
+.number-desc-number,
+.number-desc-desc {
+  text-align: center;
+  --mdc-typography-overline-line-height: 1.5rem;
+}
+
+.number-desc-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.over-limit .number-desc-number {
+  color: var(--mdc-theme-error);
+}
+
+.armor-card {
+  display: flex;
+  align-items: center;
+}
+
+.armor-card,
+.warning-card {
+  margin: 24px;
+  padding: 16px;
+}
+
+.armor-card h3 {
+  margin: 0.5em;
+}
+
+.armor-card h4 {
+  margin: 0.5em;
+  margin-top: 1em;
+}
+
+.mdc-theme--error-bg {
+  background: var(--mdc-theme-error, #b00020);
+  background: #b00020;
+}
+
+.health-color {
+  color: var(--mdc-theme-error, #b00020);
+}
+
+.damage-selector-width {
+  width: 400px;
+}
+
+.mdc-theme--secondary-bg .mdc-chip.mdc-chip--selected {
+  background-color: #6200ee;
+  background-color: var(--mdc-theme-primary, #6200ee);
+  color: #fff !important;
+  color: var(--mdc-theme-on-primary, #fff) !important;
+}
+
+.mdc-theme--primary-bg .mdc-chip.mdc-chip--selected {
+  background-color: #6200ee;
+  background-color: var(--mdc-theme-secondary, #6200ee);
+  color: #fff !important;
+  color: var(--mdc-theme-on-secondary, #fff) !important;
+}
+
+.side-flex {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.side-flex > * {
+  margin: 24px;
+  width: 150px;
+  min-height: 110px;
+}

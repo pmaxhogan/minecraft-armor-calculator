@@ -323,8 +323,8 @@ const app = Vue.createApp({
     select.listen("MDCSelect:change", () => {
       this.damageCalcSelectedType = select.value;
     });
-    
-    
+
+
 const textField = new MDCTextField(document.querySelector('.mdc-text-field'))
   }
 });
@@ -397,7 +397,6 @@ app.component("mdc-chip-set", {
       }else{
         this.somethingSelected = false;
         setTimeout(() => {
-          console.log("click");
           if(!this.somethingSelected) this.$refs.root.querySelector(".mdc-chip").click();
         }, 0);
       }
